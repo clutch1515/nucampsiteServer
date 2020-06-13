@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const promotion = require('../models/promotions');
+const authenticate = require('../authenticate');
 
 const promotionsRouter = express.Router();
 
@@ -16,7 +17,7 @@ promotionsRouter.route('/')
     })
     .catch(err => next(err));
 })
-.post((req, res) => {
+.post(authenticate.verifyUser, (req, res) => {
     promotion.create(req.body)
     .then(promotion => {
         console.log('promotion Created', promotion); 
@@ -26,11 +27,11 @@ promotionsRouter.route('/')
     })
     .catch(err => next(err))
  })
- .put((req, res) => {
+ .put(authenticate.verifyUser, (req, res) => {
      res.statusCode = 403;
      res.end('PUT operation not supported on /promotions');
  })
- .delete((req, res, next) => {
+ .delete(authenticate.verifyUser, (req, res, next) => {
      promotion.deleteMany()
      .then(response => {
          res.statusCode = 200;
@@ -39,7 +40,7 @@ promotionsRouter.route('/')
      })
      .catch(err => next(err));
  });
- promotionRouter.route('/:promotionId')
+ promotionsRouter.route('/:promotionId')
  .get((req, res, next) => {
      promotion.findById(req.params.promotionId)
      .then(promotion => {
@@ -55,7 +56,7 @@ promotionsRouter.route('/')
      })
      .catch(err => next(err));
  })
- .post((req, res, next) => {
+ .post(authenticate.verifyUser, (req, res, next) => {
      promotion.findById(req.params.promotionId)
      .then(promotion => {
          if (promotion) {
@@ -74,7 +75,7 @@ promotionsRouter.route('/')
      })
      .catch(err => next(err));
  })
- .put((req, res, next) => {
+ .put(authenticate.verifyUser, (req, res, next) => {
      promotion.findByIdAndUpdate(req.params.promotionId, {
          $set: req.body
      }, { new: true})
@@ -85,7 +86,7 @@ promotionsRouter.route('/')
      })
      .catch(err => next(err));
  })
- .delete((req, res, next) => {
+ .delete(authenticate.verifyUser, (req, res, next) => {
      promotion.findByIdAndDelete(req.params.promotionId)
      .then(response => {
          res.statusCode = 200;
@@ -94,4 +95,4 @@ promotionsRouter.route('/')
      })
      .catch(err => next(err));
  })
- module.exports = promotionRouter;
+ module.exports = promotionsRouter;
